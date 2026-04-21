@@ -196,6 +196,7 @@ static inline void swap_read_unplug(struct swap_iocb *plug)
 void swap_write_unplug(struct swap_iocb *sio);
 int swap_writeout(struct folio *folio, struct swap_iocb **swap_plug);
 void __swap_writepage(struct folio *folio, struct swap_iocb **swap_plug);
+int kcompressd(void *p);
 
 /* linux/mm/swap_state.c */
 extern struct address_space swap_space __read_mostly;
@@ -393,6 +394,11 @@ static inline void swap_update_readahead(struct folio *folio,
 
 static inline int swap_writeout(struct folio *folio,
 		struct swap_iocb **swap_plug)
+{
+	return 0;
+}
+
+static inline int kcompressd(void *p)
 {
 	return 0;
 }
