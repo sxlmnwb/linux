@@ -62,6 +62,11 @@
 #include <linux/sched/bore.h>
 #endif /* CONFIG_SCHED_BORE */
 
+#ifdef CONFIG_SCHED_CAMBYSES
+#include "cambyses.h"
+#endif
+
+
 /*
  * The initial- and re-scaling of tunables is configurable
  *
@@ -9847,11 +9852,20 @@ static void detach_task(struct task_struct *p, struct lb_env *env)
  *
  * Returns a task if successful and NULL otherwise.
  */
+#ifdef CONFIG_SCHED_CAMBYSES
+#include "cambyses.c"
+#endif
+
 static struct task_struct *detach_one_task(struct lb_env *env)
 {
 	struct task_struct *p;
 
 	lockdep_assert_rq_held(env->src_rq);
+
+#ifdef CONFIG_SCHED_CAMBYSES
+	if (static_branch_likely(&sched_cambyses))
+		return detach_one_task_cambyses(env);
+#endif
 
 	list_for_each_entry_reverse(p,
 			&env->src_rq->cfs_tasks, se.group_node) {
@@ -9898,6 +9912,11 @@ static int detach_tasks(struct lb_env *env)
 
 	if (env->imbalance <= 0)
 		return 0;
+
+#ifdef CONFIG_SCHED_CAMBYSES
+	if (static_branch_likely(&sched_cambyses))
+		return detach_tasks_cambyses(env);
+#endif
 
 	while (!list_empty(tasks)) {
 		/*

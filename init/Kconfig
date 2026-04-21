@@ -1447,6 +1447,41 @@ config SCHED_BORE
 
 	  If unsure, say Y here.
 
+config SCHED_CAMBYSES
+	bool "Cambyses scored migration selection for CFS load balancer"
+	depends on SMP
+	default y
+	help
+	  Context-Aware Migration Balancer Yielding Scored Entity Selection.
+
+	  Replaces the default FIFO task selection in detach_tasks() with
+	  a scoring function that evaluates cache coldness, load contribution,
+	  affinity breadth, and wakee stability to select the most suitable
+	  migration candidates.
+
+	  When disabled at runtime (sysctl kernel.sched_cambyses=0),
+	  all Cambyses paths are NOPed out via static key at zero cost.
+
+	  If unsure, say Y here.
+
+config SCHED_CAMBYSES_SIMD
+	bool "SIMD acceleration for Cambyses batch scoring"
+	depends on SCHED_CAMBYSES
+	depends on X86_64
+	default y
+	help
+	  Uses SIMD instructions (AVX2/SSSE3 on x86_64) for batch scoring
+	  of migration candidates when the candidate count exceeds 8.
+
+	  SSSE3 processes 4 candidates per xmm register, AVX2 processes
+	  8 candidates per ymm register, using PMADDUBSW for integer
+	  multiply-accumulate of feature vectors.
+
+	  Requires kernel_fpu_begin/end (XSAVE/XRSTOR).  Falls back to
+	  scalar scoring when SIMD is not beneficial or CPU lacks support.
+
+	  If unsure, say Y here.
+
 config SCHED_AUTOGROUP
 	bool "Automatic process group scheduling"
 	select CGROUPS
